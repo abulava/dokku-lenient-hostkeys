@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+APP="$1"; IMAGE="$(get_app_image_name $APP)"
+
+# Ensure the image is appropriate
+is_image_herokuish_based "$IMAGE" || exit 0
+
+dokku_log_info1 "Configuring lenient SSH HostKeyChecking in herokuish environment ..."
+
+idWithConfig=$(echo -e "UserKnownHostsFile /dev/null\nStrictHostKeyChecking no" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+test $(docker wait $idWithConfig) -eq 0
+docker commit $idWithConfig $IMAGE > /dev/null

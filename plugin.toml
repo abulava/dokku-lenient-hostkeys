@@ -1,0 +1,4 @@
+[plugin]
+description = "Ignore SSH host keys from within container environment"
+version = "0.1.0"
+[plugin.config]
